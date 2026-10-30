@@ -94,10 +94,12 @@ def test_dry_run_writes_nothing(world, capsys):
 
 
 def test_keep_target_records(world):
+    teams_file = world / "data" / "modteams.dat"
+    before = teams_file.read_bytes()
     players.run(ns(world, scope="data", keep_target_records=True))
-    teams = read_nbt(world / "data" / "modteams.dat").get("data").get("Players").items
-    assert [t.get("Data") for t in teams] == [b"source's", b"target's"]
-    assert teams[0].get("UUID") == to_ints(SRC)
+    assert teams_file.read_bytes() == before                      # nothing to change there: not even rewritten
+    profiles = json.loads((world / "data" / "profiles.json").read_text())
+    assert profiles == {"profiles": {str(DST): {"lvl": 3}}}       # no conflict there, so it still moves
 
 
 def test_name_keyed_file_goes_to_the_target_name(world):

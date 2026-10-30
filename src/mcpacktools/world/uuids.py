@@ -73,7 +73,8 @@ class UuidRewriter:
         self.names = (src_name.encode(), dst_name.encode()) if src_name and dst_name else None
         self.keep_target_records = keep_target_records
         self.only_ids = only_ids
-        self.hits: list[str] = []
+        self.hits: list[str] = []    # changes made
+        self.notes: list[str] = []   # records deliberately left alone
 
     # ------------------------------------------------------------------ strings
     def _string(self, s: str) -> str:
@@ -153,7 +154,7 @@ class UuidRewriter:
         dst_keys = [e for e in c.entries if self._string_is(e[0], self.dst)]
         if dst_keys:
             if self.keep_target_records:
-                self.hits.append(f"{where}: target already has a record; kept it, left the source's")
+                self.notes.append(f"{where}: the target already has a record; kept it, left the source's as it was")
                 return 0
             c.entries = [e for e in c.entries if e not in dst_keys]
             self.hits.append(f"{where}: dropped the target's own record")
@@ -171,7 +172,7 @@ class UuidRewriter:
             if src_idx and dst_idx:
                 if self.keep_target_records:
                     skip = set(src_idx)
-                    self.hits.append(f"{where}: target already has a record; kept it, left the source's")
+                    self.notes.append(f"{where}: the target already has a record; kept it, left the source's as it was")
                 else:
                     lst.items = items = [c for i, c in enumerate(items) if i not in set(dst_idx)]
                     self.hits.append(f"{where}: dropped the target's own record")
@@ -196,7 +197,7 @@ class UuidRewriter:
             src =[k for k in node if k.lower() in (str(self.src), self.src.hex)]
             if src and any(k.lower() in (str(self.dst), self.dst.hex) for k in node):
                 if self.keep_target_records:
-                    self.hits.append(f"{where}: target already has a record; kept it, left the source's")
+                    self.notes.append(f"{where}: the target already has a record; kept it, left the source's as it was")
                     src = []
                 else:
                     node = {k: v for k, v in node.items() if k.lower() not in (str(self.dst), self.dst.hex)}

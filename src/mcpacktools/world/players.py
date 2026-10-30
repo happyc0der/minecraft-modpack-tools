@@ -357,6 +357,10 @@ def run(args) -> int:
             print("    " + hit)
         if len(rw.hits) > 200:
             print(f"    ... and {len(rw.hits) - 200} more")
+    if rw.notes:
+        print(f"left alone ({len(rw.notes)}):")
+        for note in rw.notes:
+            print("    " + note)
     print(f"files {'to change' if args.dry_run else 'changed'}: {len(set(out.written))}"
           + ("" if args.dry_run or not out.written else f"; originals backed up in {backup}"))
     return 0
