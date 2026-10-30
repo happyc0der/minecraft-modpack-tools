@@ -117,6 +117,17 @@ def test_nil_uuid_needs_explicit_permission(world):
         players.run(ns(world, src=str(NIL)))
 
 
+def test_zero_uuid_ignores_other_four_zero_arrays():
+    from mcpacktools.world.uuids import UuidRewriter
+    campfire = compound(id=(nbt.STRING, b"minecraft:campfire"), CookingTimes=(nbt.INT_ARRAY, [0, 0, 0, 0]))
+    wolf = compound(id=(nbt.STRING, b"minecraft:wolf"), Owner=(nbt.INT_ARRAY, [0, 0, 0, 0]))
+    rw = UuidRewriter(NIL, DST)
+    rw.compound(campfire, "campfire")
+    rw.compound(wolf, "wolf")
+    assert campfire.get("CookingTimes") == [0, 0, 0, 0]
+    assert wolf.get("Owner") == to_ints(DST)
+
+
 def test_offline_uuid_is_version_3():
     u = offline_uuid("Steve")
     assert u.version == 3 and u.variant == "specified in RFC 4122"

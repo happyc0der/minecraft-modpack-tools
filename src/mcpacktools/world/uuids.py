@@ -22,6 +22,7 @@ from uuid import UUID
 from mcpacktools.nbt import COMPOUND, INT_ARRAY, LIST, LONG, STRING, Compound, ListTag
 
 NIL = UUID(int=0)
+UUID_FIELD = re.compile(r"uuid|owner|thrower|lovecause|angry|target|player|leash", re.IGNORECASE)
 PAIR_SUFFIXES = (("Most", "Least"), ("U", "L"))
 NAME_KEYS = {b"Name", b"name", b"Title", b"Owner", b"OwnerName", b"ownerName", b"PlayerName", b"playerName",
              b"Username", b"username", b"LastKnownName", b"lastKnownName"}
@@ -95,9 +96,20 @@ class UuidRewriter:
             if (most[2], least[2]) == longs:
                 return True
         for name, t, v in c.entries:
-            if (t == INT_ARRAY and v == ints) or (t == STRING and self._string_is(v, u)):
+            if (t == INT_ARRAY and self._ints_are(name, v, u)) or (t == STRING and self._string_is(v, u)):
                 return True
         return False
+
+    @staticmethod
+    def _ints_are(name: bytes | str, value: list, u: UUID) -> bool:
+        """A 4-int array storing ``u``. Four zeros are common in other data (campfire cooking timers), so the
+        all-zero UUID only counts in a field whose name says it holds a UUID."""
+        if value != to_ints(u):
+            return False
+        if u != NIL:
+            return True
+        name = name.decode("utf-8", "replace") if isinstance(name, bytes) else name
+        return bool(UUID_FIELD.search(name))
 
     @staticmethod
     def _pairs(c: Compound):
@@ -125,7 +137,7 @@ class UuidRewriter:
         for entry in c.entries:
             name, t, v = entry
             here = f"{where}/{name.decode('utf-8', 'replace')}"
-            if t == INT_ARRAY and allowed and v == self.src_ints:
+            if t == INT_ARRAY and allowed and self._ints_are(name, v, self.src):
                 entry[2] = list(self.dst_ints)
                 direct += 1
                 self.hits.append(here)
@@ -182,7 +194,7 @@ class UuidRewriter:
                 self.compound(v, here, allowed)
             elif lst.elem_type == LIST:
                 self.list(v, here, allowed)
-            elif lst.elem_type == INT_ARRAY and allowed and v == self.src_ints:
+            elif lst.elem_type == INT_ARRAY and allowed and self._ints_are(where.rsplit("/", 1)[-1], v, self.src):
                 items[i] = list(self.dst_ints)
                 self.hits.append(here)
             elif lst.elem_type == STRING and allowed:

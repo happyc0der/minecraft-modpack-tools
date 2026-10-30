@@ -53,6 +53,8 @@ use it for "nobody" (unowned machines, public things). So with it as the source:
 * `data` needs `--allow-nil`: read the dry-run list and check every entry is really that player's;
 * `regions` also needs `--only-ids`, a regex of the block entity or entity ids that the player owned, for example
   `--only-ids "bonsai|petrock"`.
+* A 4-int array of zeros only counts as this UUID in a field named like one (`Owner`, `UUID`, `Thrower`...): other
+  data stores four zeros too (a campfire's `CookingTimes`).
 
 ## Example
 
