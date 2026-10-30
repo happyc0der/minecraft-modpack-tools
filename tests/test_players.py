@@ -117,6 +117,19 @@ def test_nil_uuid_needs_explicit_permission(world):
         players.run(ns(world, src=str(NIL)))
 
 
+def test_block_lists_are_never_treated_as_per_player_records():
+    from mcpacktools.world.uuids import UuidRewriter
+    tiles = ListTag(nbt.COMPOUND, [owned(SRC, "mod:machine"), owned(DST, "mod:machine")])
+    chunk = compound(TileEntities=(nbt.LIST, tiles))
+    UuidRewriter(SRC, DST).compound(chunk, "chunk")
+    assert len(chunk.get("TileEntities").items) == 2                         # both machines are still there
+    assert all((t.get("ownerMost"), t.get("ownerLeast")) == to_longs(DST) for t in chunk.get("TileEntities").items)
+    nodes = ListTag(nbt.COMPOUND, [owned(SRC, "n1"), owned(SRC, "n2"), owned(DST, "n3")])  # an owner appears twice
+    data = compound(Nodes=(nbt.LIST, nodes))
+    UuidRewriter(SRC, DST).compound(data, "data")
+    assert len(data.get("Nodes").items) == 3
+
+
 def test_zero_uuid_ignores_other_four_zero_arrays():
     from mcpacktools.world.uuids import UuidRewriter
     campfire = compound(id=(nbt.STRING, b"minecraft:campfire"), CookingTimes=(nbt.INT_ARRAY, [0, 0, 0, 0]))

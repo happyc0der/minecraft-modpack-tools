@@ -23,6 +23,9 @@ from mcpacktools.nbt import COMPOUND, INT_ARRAY, LIST, LONG, STRING, Compound, L
 
 NIL = UUID(int=0)
 UUID_FIELD = re.compile(r"uuid|owner|thrower|lovecause|angry|target|player|leash", re.IGNORECASE)
+# Lists of things in the world, never one-record-per-player lists (an owner may legitimately own two of them).
+NOT_RECORD_LISTS = {"TileEntities", "Entities", "block_entities", "entities", "Items", "Inventory", "EnderItems",
+                    "Passengers", "TileTicks", "LiquidTicks"}
 PAIR_SUFFIXES = (("Most", "Least"), ("U", "L"))
 NAME_KEYS = {b"Name", b"name", b"Title", b"Owner", b"OwnerName", b"ownerName", b"PlayerName", b"playerName",
              b"Username", b"username", b"LastKnownName", b"lastKnownName"}
@@ -178,10 +181,12 @@ class UuidRewriter:
     def list(self, lst: ListTag, where: str, allowed: bool = True) -> None:
         items = lst.items
         skip = set()
-        if lst.elem_type == COMPOUND and allowed:
+        if lst.elem_type == COMPOUND and allowed and where.rsplit("/", 1)[-1] not in NOT_RECORD_LISTS:
             src_idx = [i for i, c in enumerate(items) if self.holds(c, self.src)]
             dst_idx = [i for i, c in enumerate(items) if self.holds(c, self.dst)]
-            if src_idx and dst_idx:
+            # Only a list with exactly one entry per player is a list of per-player records. Lists where an owner
+            # can appear several times (blocks, network nodes, items) just get their UUIDs rewritten.
+            if len(src_idx) == 1 and len(dst_idx) == 1:
                 if self.keep_target_records:
                     skip = set(src_idx)
                     self.notes.append(f"{where}: the target already has a record; kept it, left the source's as it was")
