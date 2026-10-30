@@ -1,0 +1,43 @@
+[project]
+name = "minecraft-modpack-tools"
+version = "0.1.0"
+description = "Command-line tools for Minecraft modpacks: build HD texture packs, rebuild animated textures, fit packs into the texture atlas, repair 26.x item atlases, move player data between UUIDs, and find worlds."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "happyc0der" }]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "pillow>=10.0",
+    "scipy>=1.10",
+]
+keywords = ["minecraft", "modpack", "resource-pack", "texture-pack", "nbt", "xbrz", "upscaling"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Games/Entertainment",
+    "Topic :: Multimedia :: Graphics",
+]
+
+[project.urls]
+Repository = "https://github.com/happyc0der/minecraft-modpack-tools"
+Issues = "https://github.com/happyc0der/minecraft-modpack-tools/issues"
+
+[project.scripts]
+mcpack = "mcpacktools.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcpacktools"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

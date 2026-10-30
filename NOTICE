@@ -1,0 +1,11 @@
+minecraft-modpack-tools
+Copyright 2026 happyc0der
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This project does not include or distribute xBRZ. The optional `mcpack xbrz build` command downloads the xBRZ
+sources (Copyright Zenju, with a C export by io mintz; GPL-3.0, https://github.com/iomintz/xbrz.py) and compiles
+them on the user's machine; the resulting library is used at run time if present.
+
+Minecraft is a trademark of Mojang Synergies AB. This project is not affiliated with Mojang or Microsoft. It ships
+no game assets and no texture-pack art.

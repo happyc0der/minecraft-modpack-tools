@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+build/
+dist/
+*.egg-info/
+*.tmp
+# never commit game files or pack art
+*.zip
+*.jar
+*.mca
+*.dat
